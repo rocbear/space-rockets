@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams, Link as RouterLink } from "react-router-dom";
-import { format as timeAgo } from "timeago.js";
+import { DateTime } from "luxon";
 import { Watch, MapPin, Navigation, Layers } from "react-feather";
 import {
   Flex,
@@ -146,7 +146,9 @@ function TimeAndLocation({ launch }: { launch: LaunchType }) {
             {formatDateTime(launch.launch_date_local, true)}
           </Tooltip>
         </StatNumber>
-        <StatHelpText>{timeAgo(launch.launch_date_utc)}</StatHelpText>
+        <StatHelpText>
+          {DateTime.fromISO(launch.launch_date_utc).toRelative()}
+        </StatHelpText>
       </Stat>
       <Stat>
         <StatLabel display="flex">

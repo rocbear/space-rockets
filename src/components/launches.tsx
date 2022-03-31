@@ -1,6 +1,6 @@
 import React from "react";
 import { Badge, Box, Image, SimpleGrid, Text, Flex } from "@chakra-ui/react";
-import { format as timeAgo } from "timeago.js";
+import { DateTime } from "luxon";
 import { Link } from "react-router-dom";
 
 import { Launch, useSpaceXPaginated } from "../utils/use-space-x";
@@ -62,10 +62,14 @@ export default function Launches() {
   );
 }
 
-export function LaunchItem({ launch, isFavorited, toggleFavorite }: {
-  launch: Launch,
-  isFavorited: boolean,
-  toggleFavorite: BoundToggleFavoriteFn
+export function LaunchItem({
+  launch,
+  isFavorited,
+  toggleFavorite,
+}: {
+  launch: Launch;
+  isFavorited: boolean;
+  toggleFavorite: BoundToggleFavoriteFn;
 }) {
   return (
     <Box
@@ -137,7 +141,7 @@ export function LaunchItem({ launch, isFavorited, toggleFavorite }: {
             <Flex>
               <Text fontSize="sm">{formatDate(launch.launch_date_utc)} </Text>
               <Text color="gray.500" ml="2" fontSize="sm">
-                {timeAgo(launch.launch_date_utc)}
+                {DateTime.fromISO(launch.launch_date_utc).toRelative()}
               </Text>
             </Flex>
           </Box>
