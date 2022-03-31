@@ -27,9 +27,13 @@ function toggle(type: string, id: string, value?: boolean) {
         favorites.filter(makeInverseMatchDelegate(type, id))
       );
     if (value === true) {
-      add();
+      if (index === -1) {
+        add();
+      }
     } else if (value === false) {
-      remove();
+      if (index !== -1) {
+        remove();
+      }
     } else if (index === -1) {
       add();
     } else {
