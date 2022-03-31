@@ -8,6 +8,8 @@ import { formatDate } from "../utils/format-date";
 import Error from "./error";
 import Breadcrumbs from "./breadcrumbs";
 import LoadMoreButton from "./load-more-button";
+import FavoriteButton from "./favorite-button";
+import { useFavorites } from "../utils/use-favorites";
 
 const PAGE_SIZE = 12;
 
@@ -20,6 +22,8 @@ export default function Launches() {
       sort: "launch_date_utc",
     }
   );
+  const { toggleFavorite, isFavorited } = useFavorites();
+
   return (
     <div>
       <Breadcrumbs
@@ -31,7 +35,21 @@ export default function Launches() {
           data
             .flat()
             .map((launch) => (
-              <LaunchItem launch={launch} key={launch.flight_number} />
+              <LaunchItem
+                launch={launch}
+                key={launch.flight_number}
+                isFavorited={isFavorited(
+                  "launch",
+                  launch.flight_number.toString()
+                )}
+                toggleFavorite={(value) =>
+                  toggleFavorite(
+                    "launch",
+                    launch.flight_number.toString(),
+                    value
+                  )
+                }
+              />
             ))}
       </SimpleGrid>
       <LoadMoreButton
@@ -44,7 +62,7 @@ export default function Launches() {
   );
 }
 
-export function LaunchItem({ launch }) {
+export function LaunchItem({ launch, isFavorited, toggleFavorite }) {
   return (
     <Box
       as={Link}
@@ -77,43 +95,55 @@ export function LaunchItem({ launch }) {
         objectPosition="bottom"
       />
 
-      <Box p="6">
-        <Box d="flex" alignItems="baseline">
-          {launch.launch_success ? (
-            <Badge px="2" variant="solid" variantColor="green">
-              Successful
-            </Badge>
-          ) : (
-            <Badge px="2" variant="solid" variantColor="red">
-              Failed
-            </Badge>
-          )}
-          <Box
-            color="gray.500"
-            fontWeight="semibold"
-            letterSpacing="wide"
-            fontSize="xs"
-            textTransform="uppercase"
-            ml="2"
-          >
-            {launch.rocket.rocket_name} &bull; {launch.launch_site.site_name}
-          </Box>
-        </Box>
+      <Box p={6}>
+        <Flex justify="space-between">
+          <Box>
+            <Box d="flex" alignItems="baseline">
+              {launch.launch_success ? (
+                <Badge px="2" variant="solid" variantColor="green">
+                  Successful
+                </Badge>
+              ) : (
+                <Badge px="2" variant="solid" variantColor="red">
+                  Failed
+                </Badge>
+              )}
+              <Box
+                color="gray.500"
+                fontWeight="semibold"
+                letterSpacing="wide"
+                fontSize="xs"
+                textTransform="uppercase"
+                ml="2"
+              >
+                {launch.rocket.rocket_name} &bull;{" "}
+                {launch.launch_site.site_name}
+              </Box>
+            </Box>
 
-        <Box
-          mt="1"
-          fontWeight="semibold"
-          as="h4"
-          lineHeight="tight"
-          isTruncated
-        >
-          {launch.mission_name}
-        </Box>
-        <Flex>
-          <Text fontSize="sm">{formatDate(launch.launch_date_utc)} </Text>
-          <Text color="gray.500" ml="2" fontSize="sm">
-            {timeAgo(launch.launch_date_utc)}
-          </Text>
+            <Box
+              mt="1"
+              fontWeight="semibold"
+              as="h4"
+              lineHeight="tight"
+              isTruncated
+            >
+              {launch.mission_name}
+            </Box>
+            <Flex>
+              <Text fontSize="sm">{formatDate(launch.launch_date_utc)} </Text>
+              <Text color="gray.500" ml="2" fontSize="sm">
+                {timeAgo(launch.launch_date_utc)}
+              </Text>
+            </Flex>
+          </Box>
+          <Box alignSelf="flex-start">
+            <FavoriteButton
+              sticker
+              isFavorited={isFavorited}
+              toggleFavorite={toggleFavorite}
+            />
+          </Box>
         </Flex>
       </Box>
     </Box>

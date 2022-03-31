@@ -1,11 +1,13 @@
 import React from "react";
-import { Badge, Box, SimpleGrid, Text } from "@chakra-ui/core";
+import { Badge, Box, Flex, SimpleGrid, Text } from "@chakra-ui/core";
 import { Link } from "react-router-dom";
 
 import Error from "./error";
 import Breadcrumbs from "./breadcrumbs";
 import LoadMoreButton from "./load-more-button";
 import { useSpaceXPaginated } from "../utils/use-space-x";
+import { useFavorites } from "../utils/use-favorites";
+import FavoriteButton from "./favorite-button";
 
 const PAGE_SIZE = 12;
 
@@ -16,7 +18,7 @@ export default function LaunchPads() {
       limit: PAGE_SIZE,
     }
   );
-
+  const { toggleFavorite, isFavorited } = useFavorites();
   return (
     <div>
       <Breadcrumbs
@@ -28,7 +30,21 @@ export default function LaunchPads() {
           data
             .flat()
             .map((launchPad) => (
-              <LaunchPadItem key={launchPad.site_id} launchPad={launchPad} />
+              <LaunchPadItem
+                key={launchPad.site_id}
+                launchPad={launchPad}
+                isFavorited={isFavorited(
+                  "launchpad",
+                  launchPad.site_id.toString()
+                )}
+                toggleFavorite={(value) =>
+                  toggleFavorite(
+                    "launchpad",
+                    launchPad.site_id.toString(),
+                    value
+                  )
+                }
+              />
             ))}
       </SimpleGrid>
       <LoadMoreButton
@@ -41,7 +57,7 @@ export default function LaunchPads() {
   );
 }
 
-function LaunchPadItem({ launchPad }) {
+function LaunchPadItem({ launchPad, isFavorited, toggleFavorite }) {
   return (
     <Box
       as={Link}
@@ -53,41 +69,52 @@ function LaunchPadItem({ launchPad }) {
       position="relative"
     >
       <Box p="6">
-        <Box d="flex" alignItems="baseline">
-          {launchPad.status === "active" ? (
-            <Badge px="2" variant="solid" variantColor="green">
-              Active
-            </Badge>
-          ) : (
-            <Badge px="2" variant="solid" variantColor="red">
-              Retired
-            </Badge>
-          )}
-          <Box
-            color="gray.500"
-            fontWeight="semibold"
-            letterSpacing="wide"
-            fontSize="xs"
-            textTransform="uppercase"
-            ml="2"
-          >
-            {launchPad.attempted_launches} attempted &bull;{" "}
-            {launchPad.successful_launches} succeeded
-          </Box>
-        </Box>
+        <Flex justify="space-between">
+          <Box>
+            <Box d="flex" alignItems="baseline">
+              {launchPad.status === "active" ? (
+                <Badge px="2" variant="solid" variantColor="green">
+                  Active
+                </Badge>
+              ) : (
+                <Badge px="2" variant="solid" variantColor="red">
+                  Retired
+                </Badge>
+              )}
+              <Box
+                color="gray.500"
+                fontWeight="semibold"
+                letterSpacing="wide"
+                fontSize="xs"
+                textTransform="uppercase"
+                ml="2"
+              >
+                {launchPad.attempted_launches} attempted &bull;{" "}
+                {launchPad.successful_launches} succeeded
+              </Box>
+            </Box>
 
-        <Box
-          mt="1"
-          fontWeight="semibold"
-          as="h4"
-          lineHeight="tight"
-          isTruncated
-        >
-          {launchPad.name}
-        </Box>
-        <Text color="gray.500" fontSize="sm">
-          {launchPad.vehicles_launched.join(", ")}
-        </Text>
+            <Box
+              mt="1"
+              fontWeight="semibold"
+              as="h4"
+              lineHeight="tight"
+              isTruncated
+            >
+              {launchPad.name}
+            </Box>
+            <Text color="gray.500" fontSize="sm">
+              {launchPad.vehicles_launched.join(", ")}
+            </Text>
+          </Box>
+          <Box alignSelf="flex-start">
+            <FavoriteButton
+              sticker
+              isFavorited={isFavorited}
+              toggleFavorite={toggleFavorite}
+            />
+          </Box>
+        </Flex>
       </Box>
     </Box>
   );

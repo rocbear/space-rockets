@@ -21,6 +21,8 @@ import { useSpaceX } from "../utils/use-space-x";
 import Error from "./error";
 import Breadcrumbs from "./breadcrumbs";
 import { LaunchItem } from "./launches";
+import { useFavorite } from "../utils/use-favorites";
+import FavoriteButton from "./favorite-button";
 
 export default function LaunchPad() {
   let { launchPadId } = useParams();
@@ -33,6 +35,8 @@ export default function LaunchPad() {
     site_id: launchPad?.site_id,
   });
 
+  const { isFavorited, toggleFavorite } = useFavorite("launchpad", launchPadId);
+
   if (error) return <Error />;
   if (!launchPad) {
     return (
@@ -44,13 +48,19 @@ export default function LaunchPad() {
 
   return (
     <div>
-      <Breadcrumbs
-        items={[
-          { label: "Home", to: "/" },
-          { label: "Launch Pads", to: ".." },
-          { label: launchPad.name },
-        ]}
-      />
+      <Flex justify="space-between" align="center" pr="6">
+        <Breadcrumbs
+          items={[
+            { label: "Home", to: "/" },
+            { label: "Launch Pads", to: ".." },
+            { label: launchPad.name },
+          ]}
+        />
+        <FavoriteButton
+          isFavorited={isFavorited}
+          toggleFavorite={toggleFavorite}
+        />
+      </Flex>
       <Header launchPad={launchPad} />
       <Box m={[3, 6]}>
         <LocationAndVehicles launchPad={launchPad} />
