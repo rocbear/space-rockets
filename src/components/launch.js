@@ -26,10 +26,13 @@ import { useSpaceX } from "../utils/use-space-x";
 import { formatDateTime } from "../utils/format-date";
 import Error from "./error";
 import Breadcrumbs from "./breadcrumbs";
+import FavoriteButton from "./favorite-button";
+import { useFavorite } from "../utils/use-favorites";
 
 export default function Launch() {
   let { launchId } = useParams();
   const { data: launch, error } = useSpaceX(`/launches/${launchId}`);
+  const { isFavorited, toggleFavorite } = useFavorite("launches", launchId);
 
   if (error) return <Error />;
   if (!launch) {
@@ -42,13 +45,19 @@ export default function Launch() {
 
   return (
     <div>
-      <Breadcrumbs
-        items={[
-          { label: "Home", to: "/" },
-          { label: "Launches", to: ".." },
-          { label: `#${launch.flight_number}` },
-        ]}
-      />
+      <Flex justify="space-between" align="center" pr="6">
+        <Breadcrumbs
+          items={[
+            { label: "Home", to: "/" },
+            { label: "Launches", to: ".." },
+            { label: `#${launch.flight_number}` },
+          ]}
+        />
+        <FavoriteButton
+          isFavorited={isFavorited}
+          toggleFavorite={toggleFavorite}
+        />
+      </Flex>
       <Header launch={launch} />
       <Box m={[3, 6]}>
         <TimeAndLocation launch={launch} />
@@ -126,7 +135,11 @@ function TimeAndLocation({ launch }) {
           </Box>
         </StatLabel>
         <StatNumber fontSize={["md", "xl"]}>
-          <Tooltip label={launchDateLocal} aria-label={launchDateLocal} placement="top">
+          <Tooltip
+            label={launchDateLocal}
+            aria-label={launchDateLocal}
+            placement="top"
+          >
             {formatDateTime(launch.launch_date_local, true)}
           </Tooltip>
         </StatNumber>
