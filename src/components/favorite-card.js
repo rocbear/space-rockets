@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import {
   AlertDescription,
+  Badge,
   Box,
   Button,
   Flex,
@@ -9,6 +10,7 @@ import {
   Skeleton,
 } from "@chakra-ui/core";
 import FavoriteButton from "./favorite-button";
+import { useSpaceX } from "../utils/use-space-x";
 
 export function FavoriteCardSkeleton(props) {
   return (
@@ -23,7 +25,7 @@ export function FavoriteCardSkeleton(props) {
   );
 }
 
-export default function FavoriteCard({
+function GenericFavoriteCard({
   title,
   meta,
   badge,
@@ -99,4 +101,82 @@ export default function FavoriteCard({
       </Link>
     </Box>
   );
+}
+
+export function FavoriteLaunchPadCard({ id, toggleFavorite }) {
+  const {
+    data: launchPad,
+    error,
+    isValidating,
+  } = useSpaceX(`/launchpads/${id}`);
+  const loading = !launchPad || isValidating;
+  return (
+    <FavoriteCardSkeleton isLoaded={!loading}>
+      {launchPad && (
+        <GenericFavoriteCard
+          title={launchPad.name}
+          meta={`${launchPad.attempted_launches} attempted • ${launchPad.successful_launches} succeeded`}
+          error={error}
+          href={`/launch-pads/${launchPad.site_id}`}
+          loading={loading}
+          toggleFavorite={toggleFavorite}
+          badge={
+            launchPad.status === "active" ? (
+              <Badge px="2" variant="solid" variantColor="green">
+                Active
+              </Badge>
+            ) : (
+              <Badge px="2" variant="solid" variantColor="red">
+                Retired
+              </Badge>
+            )
+          }
+        />
+      )}
+    </FavoriteCardSkeleton>
+  );
+}
+
+export function FavoriteLaunchCard({ id, toggleFavorite }) {
+  const { data: launch, error, isValidating } = useSpaceX(`/launches/${id}`);
+  const loading = !launch || isValidating;
+  return (
+    <FavoriteCardSkeleton isLoaded={!loading}>
+      {launch && (
+        <GenericFavoriteCard
+          title={launch.mission_name}
+          meta={`${launch.rocket.rocket_name} • ${launch.launch_site.site_name}`}
+          error={error}
+          href={`/launches/${launch.flight_number.toString()}`}
+          imageSrc={
+            launch.links.flickr_images[0]?.replace("_o.jpg", "_z.jpg") ??
+            launch.links.mission_patch_small
+          }
+          loading={loading}
+          toggleFavorite={toggleFavorite}
+          badge={
+            launch.launch_success ? (
+              <Badge px="2" variant="solid" variantColor="green">
+                Successful
+              </Badge>
+            ) : (
+              <Badge px="2" variant="solid" variantColor="red">
+                Failed
+              </Badge>
+            )
+          }
+        />
+      )}
+    </FavoriteCardSkeleton>
+  );
+}
+
+const supportedComponents = {
+  launch: FavoriteLaunchCard,
+  launchpad: FavoriteLaunchPadCard,
+};
+
+export default function FavoriteCard({ type, id, toggleFavorite }) {
+  const Component = supportedComponents[type];
+  return Component && <Component id={id} toggleFavorite={toggleFavorite} />;
 }

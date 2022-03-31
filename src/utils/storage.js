@@ -15,6 +15,7 @@ const setItem = (key, value) => {
   } else {
     localStorage.setItem(key, JSON.stringify(value));
   }
+  return value;
 };
 const getItem = (key, defaultValue) =>
   deserialize(localStorage.getItem(key)) || defaultValue;

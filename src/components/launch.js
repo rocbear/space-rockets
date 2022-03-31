@@ -32,7 +32,7 @@ import { useFavorite } from "../utils/use-favorites";
 export default function Launch() {
   let { launchId } = useParams();
   const { data: launch, error } = useSpaceX(`/launches/${launchId}`);
-  const { isFavorited, toggleFavorite } = useFavorite("launches", launchId);
+  const { isFavorited, toggleFavorite } = useFavorite("launch", launchId);
 
   if (error) return <Error />;
   if (!launch) {

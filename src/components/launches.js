@@ -1,27 +1,15 @@
 import React from "react";
-import {
-  Badge,
-  Box,
-  Image,
-  SimpleGrid,
-  Text,
-  Flex,
-  useDisclosure,
-  Button,
-} from "@chakra-ui/core";
+import { Badge, Box, Image, SimpleGrid, Text, Flex } from "@chakra-ui/core";
 import { format as timeAgo } from "timeago.js";
 import { Link } from "react-router-dom";
 
-import { useSpaceX, useSpaceXPaginated } from "../utils/use-space-x";
+import { useSpaceXPaginated } from "../utils/use-space-x";
 import { formatDate } from "../utils/format-date";
 import Error from "./error";
 import Breadcrumbs from "./breadcrumbs";
 import LoadMoreButton from "./load-more-button";
 import FavoriteButton from "./favorite-button";
 import { useFavorites } from "../utils/use-favorites";
-import FavoritesDrawer from "./favorites-drawer";
-import { Sidebar } from "react-feather";
-import FavoriteCard, { FavoriteCardSkeleton } from "./favorite-card";
 
 const PAGE_SIZE = 12;
 
@@ -34,34 +22,13 @@ export default function Launches() {
       sort: "launch_date_utc",
     }
   );
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const { toggleFavorite, favorites } = useFavorites("launches");
+  const { toggleFavorite, isFavorited } = useFavorites();
 
   return (
     <div>
-      <FavoritesDrawer type="launches" isOpen={isOpen} onClose={onClose}>
-        {(id, toggleFavorite) => (
-          <Box mb={6}>
-            <FavoriteLaunchCard
-              key={id}
-              flightNumber={id}
-              toggleFavorite={() => toggleFavorite(id)}
-            />
-          </Box>
-        )}
-      </FavoritesDrawer>
-      <Flex justify="space-between" align="center" pr={6}>
-        <Breadcrumbs
-          items={[{ label: "Home", to: "/" }, { label: "Launches" }]}
-        />
-        <Button
-          leftIcon={() => <Box as={Sidebar} mr={2} />}
-          size="sm"
-          onClick={onOpen}
-        >
-          favourites
-        </Button>
-      </Flex>
+      <Breadcrumbs
+        items={[{ label: "Home", to: "/" }, { label: "Launches" }]}
+      />
       <SimpleGrid m={[2, null, 6]} minChildWidth="350px" spacing="4">
         {error && <Error />}
         {data &&
@@ -71,11 +38,16 @@ export default function Launches() {
               <LaunchItem
                 launch={launch}
                 key={launch.flight_number}
-                isFavorited={favorites.includes(
+                isFavorited={isFavorited(
+                  "launch",
                   launch.flight_number.toString()
                 )}
-                toggleFavorite={() =>
-                  toggleFavorite(launch.flight_number.toString())
+                toggleFavorite={(value) =>
+                  toggleFavorite(
+                    "launch",
+                    launch.flight_number.toString(),
+                    value
+                  )
                 }
               />
             ))}
@@ -87,44 +59,6 @@ export default function Launches() {
         isLoadingMore={isValidating}
       />
     </div>
-  );
-}
-
-function FavoriteLaunchCard({ flightNumber, toggleFavorite }) {
-  const {
-    data: launch,
-    error,
-    isValidating,
-  } = useSpaceX(`/launches/${flightNumber}`);
-  const loading = !launch || isValidating;
-  return (
-    <FavoriteCardSkeleton isLoaded={!loading}>
-      {launch && (
-        <FavoriteCard
-          title={launch.mission_name}
-          meta={`${launch.rocket.rocket_name} • ${launch.launch_site.site_name}`}
-          error={error}
-          href={`/launches/${launch.flight_number.toString()}`}
-          imageSrc={
-            launch.links.flickr_images[0]?.replace("_o.jpg", "_z.jpg") ??
-            launch.links.mission_patch_small
-          }
-          loading={loading}
-          toggleFavorite={toggleFavorite}
-          badge={
-            launch.launch_success ? (
-              <Badge px="2" variant="solid" variantColor="green">
-                Successful
-              </Badge>
-            ) : (
-              <Badge px="2" variant="solid" variantColor="red">
-                Failed
-              </Badge>
-            )
-          }
-        />
-      )}
-    </FavoriteCardSkeleton>
   );
 }
 

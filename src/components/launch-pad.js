@@ -35,10 +35,7 @@ export default function LaunchPad() {
     site_id: launchPad?.site_id,
   });
 
-  const { isFavorited, toggleFavorite } = useFavorite(
-    "launchpads",
-    launchPadId
-  );
+  const { isFavorited, toggleFavorite } = useFavorite("launchpad", launchPadId);
 
   if (error) return <Error />;
   if (!launchPad) {

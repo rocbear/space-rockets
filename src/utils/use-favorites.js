@@ -1,44 +1,56 @@
 import useSWR from "swr";
 import storage from "./storage";
 
-const fetcher = (key) => {
-  const type = key.replace("/favorites/", "");
-  const favorites = storage.getItem("favorites");
-  return favorites[type];
-};
+const STORAGE_KEY = "/favorites";
 
-const update = (type, updated) => {
-  const favorites = storage.getItem("favorites");
-  favorites[type] = updated;
-  storage.setItem("favorites", favorites);
-  return updated;
-};
+const fetcher = storage.getItem;
 
-function toggle(type, id) {
+const makeMatchDelegate = (type, id) => (f) => f.type === type && f.id === id;
+const makeInverseMatchDelegate = (type, id) => (f) =>
+  f.type !== type || f.id !== id;
+
+function toggle(type, id, value) {
   return (favorites) => {
-    const set = new Set(favorites);
-    if (set.has(id)) {
-      set.delete(id);
+    const index = favorites.findIndex(makeMatchDelegate(type, id));
+    const add = () =>
+      storage.setItem(STORAGE_KEY, [
+        ...favorites,
+        {
+          type,
+          id,
+        },
+      ]);
+    const remove = () =>
+      storage.setItem(
+        STORAGE_KEY,
+        favorites.filter(makeInverseMatchDelegate(type, id))
+      );
+    if (value === true) {
+      add();
+    } else if (value === false) {
+      remove();
+    } else if (index === -1) {
+      add();
     } else {
-      set.add(id);
+      remove();
     }
-    return update(type, [...set]);
   };
 }
 
-export function useFavorites(type) {
-  const key = `/favorites/${type}`;
-  const { data, mutate } = useSWR(key, fetcher);
+export function useFavorites() {
+  const { data, mutate } = useSWR(STORAGE_KEY, fetcher);
   return {
     favorites: data || [],
-    toggleFavorite: (id) => mutate(toggle(type, id.toString())),
+    isFavorited: (type, id) => Boolean(data?.find(makeMatchDelegate(type, id))),
+    toggleFavorite: (type, id, value) =>
+      mutate(toggle(type, id.toString(), value)),
   };
 }
 
 export function useFavorite(type, id) {
-  const { data, mutate } = useSWR(`/favorites/${type}`, fetcher);
+  const { data, mutate } = useSWR(STORAGE_KEY, fetcher);
   return {
-    isFavorited: data && data.includes(id.toString()),
-    toggleFavorite: () => mutate(toggle(type, id.toString())),
+    isFavorited: Boolean(data?.find(makeMatchDelegate(type, id))),
+    toggleFavorite: (value) => mutate(toggle(type, id.toString(), value)),
   };
 }

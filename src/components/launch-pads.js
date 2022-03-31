@@ -1,24 +1,13 @@
 import React from "react";
-import {
-  Badge,
-  Box,
-  Button,
-  Flex,
-  SimpleGrid,
-  Text,
-  useDisclosure,
-} from "@chakra-ui/core";
+import { Badge, Box, Flex, SimpleGrid, Text } from "@chakra-ui/core";
 import { Link } from "react-router-dom";
 
 import Error from "./error";
 import Breadcrumbs from "./breadcrumbs";
 import LoadMoreButton from "./load-more-button";
-import { useSpaceX, useSpaceXPaginated } from "../utils/use-space-x";
+import { useSpaceXPaginated } from "../utils/use-space-x";
 import { useFavorites } from "../utils/use-favorites";
 import FavoriteButton from "./favorite-button";
-import FavoritesDrawer from "./favorites-drawer";
-import FavoriteCard, { FavoriteCardSkeleton } from "./favorite-card";
-import { Sidebar } from "react-feather";
 
 const PAGE_SIZE = 12;
 
@@ -29,33 +18,12 @@ export default function LaunchPads() {
       limit: PAGE_SIZE,
     }
   );
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const { toggleFavorite, favorites } = useFavorites("launchpads");
+  const { toggleFavorite, isFavorited } = useFavorites();
   return (
     <div>
-      <FavoritesDrawer type="launchpads" isOpen={isOpen} onClose={onClose}>
-        {(id, toggleFavorite) => (
-          <Box mb={6}>
-            <FavoriteLaunchPadCard
-              key={id}
-              siteId={id}
-              toggleFavorite={() => toggleFavorite(id)}
-            />
-          </Box>
-        )}
-      </FavoritesDrawer>
-      <Flex justify="space-between" align="center" pr={6}>
-        <Breadcrumbs
-          items={[{ label: "Home", to: "/" }, { label: "Launch Pads" }]}
-        />
-        <Button
-          leftIcon={() => <Box as={Sidebar} mr={2} />}
-          size="sm"
-          onClick={onOpen}
-        >
-          favourites
-        </Button>
-      </Flex>
+      <Breadcrumbs
+        items={[{ label: "Home", to: "/" }, { label: "Launch Pads" }]}
+      />
       <SimpleGrid m={[2, null, 6]} minChildWidth="350px" spacing="4">
         {error && <Error />}
         {data &&
@@ -65,9 +33,16 @@ export default function LaunchPads() {
               <LaunchPadItem
                 key={launchPad.site_id}
                 launchPad={launchPad}
-                isFavorited={favorites.includes(launchPad.site_id.toString())}
-                toggleFavorite={() =>
-                  toggleFavorite(launchPad.site_id.toString())
+                isFavorited={isFavorited(
+                  "launchpad",
+                  launchPad.site_id.toString()
+                )}
+                toggleFavorite={(value) =>
+                  toggleFavorite(
+                    "launchpad",
+                    launchPad.site_id.toString(),
+                    value
+                  )
                 }
               />
             ))}
@@ -79,40 +54,6 @@ export default function LaunchPads() {
         isLoadingMore={isValidating}
       />
     </div>
-  );
-}
-
-function FavoriteLaunchPadCard({ siteId, toggleFavorite }) {
-  const {
-    data: launchPad,
-    error,
-    isValidating,
-  } = useSpaceX(`/launchpads/${siteId}`);
-  const loading = !launchPad || isValidating;
-  return (
-    <FavoriteCardSkeleton isLoaded={!loading}>
-      {launchPad && (
-        <FavoriteCard
-          title={launchPad.name}
-          meta={`${launchPad.attempted_launches} attempted • ${launchPad.successful_launches} succeeded`}
-          error={error}
-          href={`/launch-pads/${launchPad.site_id}`}
-          loading={loading}
-          toggleFavorite={toggleFavorite}
-          badge={
-            launchPad.status === "active" ? (
-              <Badge px="2" variant="solid" variantColor="green">
-                Active
-              </Badge>
-            ) : (
-              <Badge px="2" variant="solid" variantColor="red">
-                Retired
-              </Badge>
-            )
-          }
-        />
-      )}
-    </FavoriteCardSkeleton>
   );
 }
 
