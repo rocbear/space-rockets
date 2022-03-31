@@ -14,14 +14,14 @@ import {
   Text,
   Spinner,
   Stack,
-  AspectRatioBox,
+  AspectRatioBox
 } from "@chakra-ui/core";
 
 import { useSpaceX } from "../utils/use-space-x";
 import Error from "./error";
 import Breadcrumbs from "./breadcrumbs";
 import { LaunchItem } from "./launches";
-import { useFavorite } from "../utils/use-favorites";
+import { useFavorite, useFavorites } from "../utils/use-favorites";
 import FavoriteButton from "./favorite-button";
 
 export default function LaunchPad() {
@@ -32,7 +32,7 @@ export default function LaunchPad() {
     limit: 3,
     order: "desc",
     sort: "launch_date_utc",
-    site_id: launchPad?.site_id,
+    site_id: launchPad?.site_id
   });
 
   const { isFavorited, toggleFavorite } = useFavorite("launchpad", launchPadId);
@@ -53,7 +53,7 @@ export default function LaunchPad() {
           items={[
             { label: "Home", to: "/" },
             { label: "Launch Pads", to: ".." },
-            { label: launchPad.name },
+            { label: launchPad.name }
           ]}
         />
         <FavoriteButton
@@ -106,7 +106,7 @@ function Header({ launchPad }) {
           {launchPad.successful_launches}/{launchPad.attempted_launches}{" "}
           successful
         </Badge>
-        {launchPad.stats === "active" ? (
+        {launchPad.status === "active" ? (
           <Badge variantColor="green" fontSize={["sm", "md"]}>
             Active
           </Badge>
@@ -161,6 +161,7 @@ function Map({ location }) {
 }
 
 function RecentLaunches({ launches }) {
+  const { isFavorited, toggleFavorite } = useFavorites();
   if (!launches?.length) {
     return null;
   }
@@ -171,7 +172,14 @@ function RecentLaunches({ launches }) {
       </Text>
       <SimpleGrid minChildWidth="350px" spacing="4">
         {launches.map((launch) => (
-          <LaunchItem launch={launch} key={launch.flight_number} />
+          <LaunchItem
+            launch={launch}
+            key={launch.flight_number}
+            isFavorited={isFavorited("launch", launch.flight_number.toString())}
+            toggleFavorite={(value) =>
+              toggleFavorite("launch", launch.flight_number.toString(), value)
+            }
+          />
         ))}
       </SimpleGrid>
     </Stack>
