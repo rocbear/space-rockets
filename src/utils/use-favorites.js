@@ -3,7 +3,7 @@ import storage from "./storage";
 
 const STORAGE_KEY = "/favorites";
 
-const fetcher = storage.getItem;
+const fetcher = (key) => storage.getItem(key, []);
 
 const makeMatchDelegate = (type, id) => (f) => f.type === type && f.id === id;
 const makeInverseMatchDelegate = (type, id) => (f) =>
@@ -18,7 +18,7 @@ function toggle(type, id, value) {
         {
           type,
           id,
-        },
+        }
       ]);
     const remove = () =>
       storage.setItem(
