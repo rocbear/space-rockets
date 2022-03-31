@@ -1,4 +1,3 @@
-import React from "react";
 import { Link } from "react-router-dom";
 import {
   AlertDescription,
@@ -8,11 +7,14 @@ import {
   Flex,
   Image,
   Skeleton,
-} from "@chakra-ui/core";
+  SkeletonProps,
+} from "@chakra-ui/react";
 import FavoriteButton from "./favorite-button";
 import { useSpaceX } from "../utils/use-space-x";
+import { ReactElement } from "react";
+import { BoundToggleFavoriteFn } from "../utils/use-favorites";
 
-export function FavoriteCardSkeleton(props) {
+export function FavoriteCardSkeleton(props: SkeletonProps) {
   return (
     <Skeleton
       h={["auto", 90]}
@@ -25,6 +27,17 @@ export function FavoriteCardSkeleton(props) {
   );
 }
 
+type Props = {
+  title: string;
+  meta: string;
+  badge: ReactElement;
+  loading: boolean;
+  imageSrc?: string;
+  href: string;
+  toggleFavorite: BoundToggleFavoriteFn;
+  error?: Error | string;
+};
+
 function GenericFavoriteCard({
   title,
   meta,
@@ -34,7 +47,7 @@ function GenericFavoriteCard({
   href,
   toggleFavorite,
   error,
-}) {
+}: Props) {
   if (!loading && error) {
     return (
       <Box
@@ -48,7 +61,11 @@ function GenericFavoriteCard({
           We couldn't load this item, if the problem persists after a while the
           data may have been removed. You can remove this item from your
           favorites by clicking{" "}
-          <Button variant="link" title="remove" onClick={toggleFavorite}>
+          <Button
+            variant="link"
+            title="remove"
+            onClick={() => toggleFavorite()}
+          >
             here
           </Button>
         </AlertDescription>
@@ -103,7 +120,15 @@ function GenericFavoriteCard({
   );
 }
 
-export function FavoriteLaunchPadCard({ id, toggleFavorite }) {
+type FavoriteCardProps = {
+  id: string;
+  toggleFavorite: BoundToggleFavoriteFn;
+};
+
+export function FavoriteLaunchPadCard({
+  id,
+  toggleFavorite,
+}: FavoriteCardProps) {
   const {
     data: launchPad,
     error,
@@ -122,11 +147,11 @@ export function FavoriteLaunchPadCard({ id, toggleFavorite }) {
           toggleFavorite={toggleFavorite}
           badge={
             launchPad.status === "active" ? (
-              <Badge px="2" variant="solid" variantColor="green">
+              <Badge px="2" variant="solid" colorScheme="green">
                 Active
               </Badge>
             ) : (
-              <Badge px="2" variant="solid" variantColor="red">
+              <Badge px="2" variant="solid" colorScheme="red">
                 Retired
               </Badge>
             )
@@ -137,7 +162,7 @@ export function FavoriteLaunchPadCard({ id, toggleFavorite }) {
   );
 }
 
-export function FavoriteLaunchCard({ id, toggleFavorite }) {
+export function FavoriteLaunchCard({ id, toggleFavorite }: FavoriteCardProps) {
   const { data: launch, error, isValidating } = useSpaceX(`/launches/${id}`);
   const loading = !launch || isValidating;
   return (
@@ -156,11 +181,11 @@ export function FavoriteLaunchCard({ id, toggleFavorite }) {
           toggleFavorite={toggleFavorite}
           badge={
             launch.launch_success ? (
-              <Badge px="2" variant="solid" variantColor="green">
+              <Badge px="2" variant="solid" colorScheme="green">
                 Successful
               </Badge>
             ) : (
-              <Badge px="2" variant="solid" variantColor="red">
+              <Badge px="2" variant="solid" colorScheme="red">
                 Failed
               </Badge>
             )
@@ -171,12 +196,18 @@ export function FavoriteLaunchCard({ id, toggleFavorite }) {
   );
 }
 
-const supportedComponents = {
+const supportedComponents: {
+  [key: string]: Function;
+} = {
   launch: FavoriteLaunchCard,
   launchpad: FavoriteLaunchPadCard,
 };
 
-export default function FavoriteCard({ type, id, toggleFavorite }) {
+export default function FavoriteCard({
+  type,
+  id,
+  toggleFavorite,
+}: FavoriteCardProps & { type: string }) {
   const Component = supportedComponents[type];
   return Component && <Component id={id} toggleFavorite={toggleFavorite} />;
 }

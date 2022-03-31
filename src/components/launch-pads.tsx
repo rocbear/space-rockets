@@ -1,12 +1,12 @@
 import React from "react";
-import { Badge, Box, Flex, SimpleGrid, Text } from "@chakra-ui/core";
+import { Badge, Box, Flex, SimpleGrid, Text } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 
 import Error from "./error";
 import Breadcrumbs from "./breadcrumbs";
 import LoadMoreButton from "./load-more-button";
-import { useSpaceXPaginated } from "../utils/use-space-x";
-import { useFavorites } from "../utils/use-favorites";
+import { LaunchPad, useSpaceXPaginated } from "../utils/use-space-x";
+import { BoundToggleFavoriteFn, useFavorites } from "../utils/use-favorites";
 import FavoriteButton from "./favorite-button";
 
 const PAGE_SIZE = 12;
@@ -37,7 +37,7 @@ export default function LaunchPads() {
                   "launchpad",
                   launchPad.site_id.toString()
                 )}
-                toggleFavorite={(value) =>
+                toggleFavorite={(value?: boolean) =>
                   toggleFavorite(
                     "launchpad",
                     launchPad.site_id.toString(),
@@ -57,7 +57,15 @@ export default function LaunchPads() {
   );
 }
 
-function LaunchPadItem({ launchPad, isFavorited, toggleFavorite }) {
+function LaunchPadItem({
+  launchPad,
+  isFavorited,
+  toggleFavorite,
+}: {
+  launchPad: LaunchPad;
+  isFavorited: boolean;
+  toggleFavorite: BoundToggleFavoriteFn;
+}) {
   return (
     <Box
       as={Link}
@@ -73,11 +81,11 @@ function LaunchPadItem({ launchPad, isFavorited, toggleFavorite }) {
           <Box>
             <Box d="flex" alignItems="baseline">
               {launchPad.status === "active" ? (
-                <Badge px="2" variant="solid" variantColor="green">
+                <Badge px="2" variant="solid" colorScheme="green">
                   Active
                 </Badge>
               ) : (
-                <Badge px="2" variant="solid" variantColor="red">
+                <Badge px="2" variant="solid" colorScheme="red">
                   Retired
                 </Badge>
               )}

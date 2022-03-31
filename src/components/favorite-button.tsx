@@ -1,16 +1,22 @@
-import React from "react";
+import { MouseEvent } from "react";
 import {
   Alert,
   AlertIcon,
   Box,
   Button,
   Flex,
-  PseudoBox,
   useToast,
-} from "@chakra-ui/core";
+} from "@chakra-ui/react";
 import { Star } from "react-feather";
+import { BoundToggleFavoriteFn } from "../utils/use-favorites";
 
-function UndoToast({ toggleFavorite, onClose }) {
+function UndoToast({
+  toggleFavorite,
+  onClose,
+}: {
+  toggleFavorite: BoundToggleFavoriteFn;
+  onClose: () => void;
+}) {
   return (
     <Alert bg="gray.700" shadow="lg" rounded="lg" mb={4}>
       <Flex direction="column" justifyContent="center" pb={1}>
@@ -43,22 +49,22 @@ export default function FavoriteButton({
   isFavorited,
   toggleFavorite,
   sticker,
+}: {
+  isFavorited: boolean;
+  toggleFavorite: BoundToggleFavoriteFn;
+  sticker?: boolean;
 }) {
   const toast = useToast();
   const fill = isFavorited ? "yellow.300" : "none";
   const color = isFavorited ? "black" : "gray.300";
-  const onClick = (event) => {
+  const onClick = (event: MouseEvent) => {
     event.preventDefault();
     event.stopPropagation();
     toggleFavorite();
     if (isFavorited) {
       toast({
         render: ({ onClose }) => (
-          <UndoToast
-            onClose={onClose}
-            isFavorited={isFavorited}
-            toggleFavorite={toggleFavorite}
-          />
+          <UndoToast onClose={onClose} toggleFavorite={toggleFavorite} />
         ),
         status: "info",
         duration: 2000,
@@ -69,19 +75,19 @@ export default function FavoriteButton({
   return (
     <Box cursor="pointer">
       {sticker ? (
-        <PseudoBox
+        <Box
           _hover={{
             transform: "scale(1.2)",
           }}
         >
           <Box as={Star} color={color} fill={fill} onClick={onClick} />
-        </PseudoBox>
+        </Box>
       ) : (
         <Button
           cursor="pointer"
           type="button"
           size="sm"
-          leftIcon={() => <Box as={Star} color={color} fill={fill} mr={1} />}
+          leftIcon={<Box as={Star} color={color} fill={fill} mr={1} />}
           iconSpacing=""
           onClick={onClick}
           title={isFavorited ? "unfavourite" : "favourite"}

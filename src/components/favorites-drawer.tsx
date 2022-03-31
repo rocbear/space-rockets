@@ -1,6 +1,6 @@
 import {
   Accordion,
-  AccordionHeader,
+  AccordionButton,
   AccordionIcon,
   AccordionItem,
   AccordionPanel,
@@ -13,30 +13,34 @@ import {
   DrawerHeader,
   DrawerOverlay,
   Flex,
-} from "@chakra-ui/core";
+  UseDisclosureReturn,
+} from "@chakra-ui/react";
 import React, { useMemo } from "react";
 import { Star } from "react-feather";
-import { useFavorites } from "../utils/use-favorites";
+import { Favorite, useFavorites } from "../utils/use-favorites";
 import FavoriteCard from "./favorite-card";
 
 const types = ["launch", "launchpad"];
-const typeLabels = {
+const typeLabels: { [key: string]: string } = {
   launch: "Launches",
   launchpad: "Launch Pads",
 };
 
-export default function FavoritesDrawer({ children, ...drawerProps }) {
+export default function FavoritesDrawer(drawerProps: UseDisclosureReturn) {
   const { favorites, toggleFavorite } = useFavorites();
   const groupedFavorites = useMemo(
     () =>
       favorites
-        ? favorites.reduce((groups, favorite) => {
-            const { type } = favorite;
-            return {
-              ...groups,
-              [type]: [...(groups[type] || []), favorite],
-            };
-          }, {})
+        ? favorites.reduce<{ [key: string]: Favorite[] }>(
+            (groups, favorite) => {
+              const { type } = favorite;
+              return {
+                ...groups,
+                [type]: [...(groups[type] || []), favorite],
+              };
+            },
+            {}
+          )
         : {},
     [favorites]
   );
@@ -79,12 +83,12 @@ export default function FavoritesDrawer({ children, ...drawerProps }) {
                       borderBottom: 0,
                     }}
                   >
-                    <AccordionHeader alignItems="center">
+                    <AccordionButton alignItems="center">
                       <Box flexGrow={1} fontSize="lg">
                         {typeLabels[type]} ({typeFavorites.length})
                       </Box>
                       <AccordionIcon />
-                    </AccordionHeader>
+                    </AccordionButton>
                     <AccordionPanel>
                       {typeFavorites.length ? (
                         typeFavorites.map(({ id, type }) => (
@@ -92,9 +96,9 @@ export default function FavoritesDrawer({ children, ...drawerProps }) {
                             <FavoriteCard
                               id={id}
                               type={type}
-                              toggleFavorite={(value) => {
-                                toggleFavorite(type, id, value);
-                              }}
+                              toggleFavorite={(value) =>
+                                toggleFavorite(type, id, value)
+                              }
                             />
                           </Box>
                         ))

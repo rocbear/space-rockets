@@ -1,6 +1,6 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-import { Box, Button, Flex, Text } from "@chakra-ui/core";
+import { Box, Button, Flex, Text } from "@chakra-ui/react";
 
 import Launches from "./launches";
 import Launch from "./launch";
@@ -28,7 +28,7 @@ export default function App() {
   );
 }
 
-function NavBar({ onOpenDrawer }) {
+function NavBar({ onOpenDrawer }: { onOpenDrawer: () => void }) {
   return (
     <Flex
       as="nav"
@@ -48,7 +48,7 @@ function NavBar({ onOpenDrawer }) {
         ¡SPACE·R0CKETS!
       </Text>
       <Button
-        leftIcon={() => <Box as={Sidebar} mr={2} />}
+        leftIcon={<Box as={Sidebar} mr={2} />}
         variant="link"
         color="gray.200"
         onClick={onOpenDrawer}

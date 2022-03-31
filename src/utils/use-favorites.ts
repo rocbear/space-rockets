@@ -5,12 +5,13 @@ const STORAGE_KEY = "/favorites";
 
 const fetcher = storage.getItem;
 
-const makeMatchDelegate = (type, id) => (f) => f.type === type && f.id === id;
-const makeInverseMatchDelegate = (type, id) => (f) =>
+const makeMatchDelegate = (type: string, id: string) => (f: Favorite) =>
+  f.type === type && f.id === id;
+const makeInverseMatchDelegate = (type: string, id: string) => (f: Favorite) =>
   f.type !== type || f.id !== id;
 
-function toggle(type, id, value) {
-  return (favorites) => {
+function toggle(type: string, id: string, value?: boolean) {
+  return (favorites: Favorite[]) => {
     const index = favorites.findIndex(makeMatchDelegate(type, id));
     const add = () =>
       storage.setItem(STORAGE_KEY, [
@@ -37,7 +38,7 @@ function toggle(type, id, value) {
   };
 }
 
-export function useFavorites() {
+export function useFavorites(): UseFavoritesReturnValue {
   const { data, mutate } = useSWR(STORAGE_KEY, fetcher);
   return {
     favorites: data || [],
@@ -47,10 +48,27 @@ export function useFavorites() {
   };
 }
 
-export function useFavorite(type, id) {
+export function useFavorite(type: string, id: string): UseFavoriteReturnValue {
   const { data, mutate } = useSWR(STORAGE_KEY, fetcher);
   return {
     isFavorited: Boolean(data?.find(makeMatchDelegate(type, id))),
     toggleFavorite: (value) => mutate(toggle(type, id.toString(), value)),
   };
 }
+
+export type Favorite = { type: string; id: string };
+export type UseFavoritesReturnValue = {
+  favorites: Favorite[];
+  isFavorited: (type: string, id: string) => boolean;
+  toggleFavorite: ToggleFavoriteFn;
+};
+export type UseFavoriteReturnValue = {
+  isFavorited: boolean;
+  toggleFavorite: BoundToggleFavoriteFn;
+};
+export type ToggleFavoriteFn = (
+  type: string,
+  id: string,
+  value?: boolean
+) => Promise<any>;
+export type BoundToggleFavoriteFn = (value?: boolean) => Promise<any>;
