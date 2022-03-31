@@ -26,9 +26,13 @@ function toggle(type, id, value) {
         favorites.filter(makeInverseMatchDelegate(type, id))
       );
     if (value === true) {
-      add();
+      if (index === -1) {
+        add();
+      }
     } else if (value === false) {
-      remove();
+      if (index !== -1) {
+        remove();
+      }
     } else if (index === -1) {
       add();
     } else {
