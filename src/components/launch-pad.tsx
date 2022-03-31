@@ -182,9 +182,9 @@ function RecentLaunches({ launches }: { launches: Launch[] }) {
           <LaunchItem
             launch={launch}
             key={launch.flight_number}
-            isFavorited={isFavorited("launch", launch.flight_number)}
+            isFavorited={isFavorited("launch", launch.flight_number.toString())}
             toggleFavorite={(value) =>
-              toggleFavorite("launch", launch.flight_number, value)
+              toggleFavorite("launch", launch.flight_number.toString(), value)
             }
           />
         ))}
