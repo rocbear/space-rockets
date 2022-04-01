@@ -1,4 +1,7 @@
-function deserialize(value) {
+function deserialize(value: string | null) {
+  if (!value) {
+    return undefined;
+  }
   let parsed;
   try {
     parsed = JSON.parse(value);
@@ -9,7 +12,7 @@ function deserialize(value) {
   return parsed;
 }
 
-const setItem = (key, value) => {
+const setItem = (key: string, value: any) => {
   if (value === null || value === undefined) {
     localStorage.removeItem(key);
   } else {
@@ -17,7 +20,7 @@ const setItem = (key, value) => {
   }
   return value;
 };
-const getItem = (key, defaultValue) =>
+const getItem = (key: string, defaultValue?: any) =>
   deserialize(localStorage.getItem(key)) || defaultValue;
 
 const storage = {

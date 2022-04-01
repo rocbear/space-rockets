@@ -1,5 +1,5 @@
-import { AlertDescription, Box, Button, Skeleton } from "@chakra-ui/core";
-import React from "react";
+import { AlertDescription, Box, Button, Skeleton } from "@chakra-ui/react";
+import { BoundToggleFavoriteFn } from "../utils/use-favorites";
 import { useSpaceX } from "../utils/use-space-x";
 import { LaunchItem } from "./launches";
 
@@ -7,6 +7,10 @@ export default function LaunchCard({
   flightNumber,
   isFavorited,
   toggleFavorite,
+}: {
+  flightNumber: string;
+  isFavorited: boolean;
+  toggleFavorite: BoundToggleFavoriteFn;
 }) {
   const {
     data: launch,
@@ -27,7 +31,7 @@ export default function LaunchCard({
           We couldn't load this launch, if the problem persists after a while
           the data may have been removed. You can remove this item from your
           favorites by clicking{" "}
-          <Button variant="link" title="remove" onClick={toggleFavorite}>
+          <Button variant="link" title="remove" onClick={() => toggleFavorite()}>
             here
           </Button>
         </AlertDescription>

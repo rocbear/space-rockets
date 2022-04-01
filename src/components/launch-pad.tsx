@@ -1,4 +1,3 @@
-import React from "react";
 import { useParams } from "react-router-dom";
 import { MapPin, Navigation } from "react-feather";
 import {
@@ -14,10 +13,14 @@ import {
   Text,
   Spinner,
   Stack,
-  AspectRatioBox
-} from "@chakra-ui/core";
+  AspectRatio,
+} from "@chakra-ui/react";
 
-import { useSpaceX } from "../utils/use-space-x";
+import {
+  Launch,
+  LaunchPad as LaunchPadType,
+  useSpaceX,
+} from "../utils/use-space-x";
 import Error from "./error";
 import Breadcrumbs from "./breadcrumbs";
 import { LaunchItem } from "./launches";
@@ -26,16 +29,20 @@ import FavoriteButton from "./favorite-button";
 
 export default function LaunchPad() {
   let { launchPadId } = useParams();
+
   const { data: launchPad, error } = useSpaceX(`/launchpads/${launchPadId}`);
 
-  const { data: launches } = useSpaceX(launchPad ? "/launches/past" : null, {
+  const { data: launches } = useSpaceX(launchPad && "/launches/past", {
     limit: 3,
     order: "desc",
     sort: "launch_date_utc",
-    site_id: launchPad?.site_id
+    site_id: launchPad?.site_id,
   });
 
-  const { isFavorited, toggleFavorite } = useFavorite("launchpad", launchPadId);
+  const { isFavorited, toggleFavorite } = useFavorite(
+    "launchpad",
+    launchPadId as string
+  );
 
   if (error) return <Error />;
   if (!launchPad) {
@@ -53,7 +60,7 @@ export default function LaunchPad() {
           items={[
             { label: "Home", to: "/" },
             { label: "Launch Pads", to: ".." },
-            { label: launchPad.name }
+            { label: launchPad.name },
           ]}
         />
         <FavoriteButton
@@ -77,7 +84,7 @@ export default function LaunchPad() {
 const randomColor = (start = 200, end = 250) =>
   `hsl(${start + end * Math.random()}, 80%, 90%)`;
 
-function Header({ launchPad }) {
+function Header({ launchPad }: { launchPad: LaunchPadType }) {
   return (
     <Flex
       background={`linear-gradient(${randomColor()}, ${randomColor()})`}
@@ -102,16 +109,16 @@ function Header({ launchPad }) {
         {launchPad.site_name_long}
       </Heading>
       <Stack isInline spacing="3">
-        <Badge variantColor="purple" fontSize={["sm", "md"]}>
+        <Badge colorScheme="purple" fontSize={["sm", "md"]}>
           {launchPad.successful_launches}/{launchPad.attempted_launches}{" "}
           successful
         </Badge>
         {launchPad.status === "active" ? (
-          <Badge variantColor="green" fontSize={["sm", "md"]}>
+          <Badge colorScheme="green" fontSize={["sm", "md"]}>
             Active
           </Badge>
         ) : (
-          <Badge variantColor="red" fontSize={["sm", "md"]}>
+          <Badge colorScheme="red" fontSize={["sm", "md"]}>
             Retired
           </Badge>
         )}
@@ -120,7 +127,7 @@ function Header({ launchPad }) {
   );
 }
 
-function LocationAndVehicles({ launchPad }) {
+function LocationAndVehicles({ launchPad }: { launchPad: LaunchPadType }) {
   return (
     <SimpleGrid columns={[1, 1, 2]} borderWidth="1px" p="4" borderRadius="md">
       <Stat>
@@ -148,20 +155,20 @@ function LocationAndVehicles({ launchPad }) {
   );
 }
 
-function Map({ location }) {
+function Map({ location }: { location: LaunchPadType["location"] }) {
   return (
-    <AspectRatioBox ratio={16 / 5}>
+    <AspectRatio ratio={16 / 5}>
       <Box
         as="iframe"
         src={`https://maps.google.com/maps?q=${location.latitude}, ${location.longitude}&z=15&output=embed`}
-        alt="demo"
       />
-    </AspectRatioBox>
+    </AspectRatio>
   );
 }
 
-function RecentLaunches({ launches }) {
-  const { isFavorited, toggleFavorite } = useFavorites();
+function RecentLaunches({ launches }: { launches: Launch[] }) {
+  const { toggleFavorite, isFavorited } = useFavorites();
+
   if (!launches?.length) {
     return null;
   }

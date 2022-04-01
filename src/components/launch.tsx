@@ -17,12 +17,12 @@ import {
   Image,
   Link,
   Stack,
-  AspectRatioBox,
+  AspectRatio,
   StatGroup,
   Tooltip,
-} from "@chakra-ui/core";
+} from "@chakra-ui/react";
 
-import { useSpaceX } from "../utils/use-space-x";
+import { Launch as LaunchType, useSpaceX } from "../utils/use-space-x";
 import { formatDateTime } from "../utils/format-date";
 import Error from "./error";
 import Breadcrumbs from "./breadcrumbs";
@@ -32,7 +32,10 @@ import { useFavorite } from "../utils/use-favorites";
 export default function Launch() {
   let { launchId } = useParams();
   const { data: launch, error } = useSpaceX(`/launches/${launchId}`);
-  const { isFavorited, toggleFavorite } = useFavorite("launch", launchId);
+  const { isFavorited, toggleFavorite } = useFavorite(
+    "launch",
+    launchId as string
+  );
 
   if (error) return <Error />;
   if (!launch) {
@@ -72,7 +75,7 @@ export default function Launch() {
   );
 }
 
-function Header({ launch }) {
+function Header({ launch }: { launch: LaunchType }) {
   return (
     <Flex
       bgImage={`url(${launch.links.flickr_images[0]})`}
@@ -106,15 +109,15 @@ function Header({ launch }) {
         {launch.mission_name}
       </Heading>
       <Stack isInline spacing="3">
-        <Badge variantColor="purple" fontSize={["xs", "md"]}>
+        <Badge colorScheme="purple" fontSize={["xs", "md"]}>
           #{launch.flight_number}
         </Badge>
         {launch.launch_success ? (
-          <Badge variantColor="green" fontSize={["xs", "md"]}>
+          <Badge colorScheme="green" fontSize={["xs", "md"]}>
             Successful
           </Badge>
         ) : (
-          <Badge variantColor="red" fontSize={["xs", "md"]}>
+          <Badge colorScheme="red" fontSize={["xs", "md"]}>
             Failed
           </Badge>
         )}
@@ -123,7 +126,7 @@ function Header({ launch }) {
   );
 }
 
-function TimeAndLocation({ launch }) {
+function TimeAndLocation({ launch }: { launch: LaunchType }) {
   const launchDateLocal = formatDateTime(launch.launch_date_local);
   return (
     <SimpleGrid columns={[1, 1, 2]} borderWidth="1px" p="4" borderRadius="md">
@@ -168,7 +171,7 @@ function TimeAndLocation({ launch }) {
   );
 }
 
-function RocketInfo({ launch }) {
+function RocketInfo({ launch }: { launch: LaunchType }) {
   const cores = launch.rocket.first_stage.cores;
 
   return (
@@ -232,20 +235,20 @@ function RocketInfo({ launch }) {
   );
 }
 
-function Video({ launch }) {
+function Video({ launch }: { launch: LaunchType }) {
   return (
-    <AspectRatioBox maxH="400px" ratio={1.7}>
+    <AspectRatio maxH="400px" ratio={1.7}>
       <Box
         as="iframe"
         title={launch.mission_name}
         src={`https://www.youtube.com/embed/${launch.links.youtube_id}`}
         allowFullScreen
       />
-    </AspectRatioBox>
+    </AspectRatio>
   );
 }
 
-function Gallery({ images }) {
+function Gallery({ images }: { images: string[] }) {
   return (
     <SimpleGrid my="6" minChildWidth="350px" spacing="4">
       {images.map((image) => (

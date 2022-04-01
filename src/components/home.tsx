@@ -1,5 +1,5 @@
-import React from "react";
-import { Flex, Box, Text, Stack, Link } from "@chakra-ui/core";
+import { ReactNode } from "react";
+import { Flex, Box, Text, Stack, Link } from "@chakra-ui/react";
 import { ArrowRight } from "react-feather";
 import { Link as BrowserLink } from "react-router-dom";
 
@@ -12,7 +12,14 @@ export default function Home() {
   );
 }
 
-function PageLink({ url, children, ...rest }) {
+function PageLink({
+  url,
+  children,
+  ...rest
+}: {
+  url: string;
+  children: ReactNode;
+}) {
   return (
     <Link as={BrowserLink} to={url} {...rest}>
       <Flex
